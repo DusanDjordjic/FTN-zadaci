@@ -3,11 +3,11 @@ CFLAGS=-Wall -Wextra
 LFAGS=
 BIN=main
 OBJS=main.o
-INPUT_FILE=automobili.txt
+ARGV=vozila.txt
 .PHONY: all build test clean
 
 all: $(BIN)
-	./$(BIN) $(INPUT_FILE)
+	./$(BIN) $(ARGV)
 
 build: $(BIN)
 

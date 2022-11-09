@@ -21,3 +21,4 @@ test:
 	echo "No tests"
 
 clean:
+	rm -rf *.o $(BIN)
