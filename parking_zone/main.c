@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
     printf("Ukupna cena parkinga za vozila u zelenoj zoni je %d dinara\n",
         total_parking_price_by_zone(niz, n, "zelena", 40));
 
+    fclose(parking_fp);
     return 0;
 }
 
