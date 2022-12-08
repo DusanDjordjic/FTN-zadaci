@@ -15,10 +15,10 @@ typedef struct {
 // Saljemo const char* da ne bi slucajno promenili stringove
 // Takodje je dobra praksa koristiti const da bi naglasili sta treba a sta ne treba da se menja
 
-FILE* fopen_safe(const char* filename, const char* mode);
-void ucitaj_parkinge(FILE* fp, parking* niz_parkinga, int* n);
-void parking_print(const parking* parking);
-int total_parking_price_by_zone(const parking* niz, const int n, const char* zone, const int zone_price);
+FILE* fopen_safe(const char* const filename, const char* const mode, const int error_code);
+void ucitaj_parkinge(FILE* fp, parking* const niz_parkinga, int* const n);
+void parking_print(const parking* const parking);
+int total_parking_price_by_zone(const parking* const niz, const int n, const char* const zone, const int zone_price);
 
 int main(int argc, char* argv[])
 {
@@ -36,12 +36,11 @@ int main(int argc, char* argv[])
      * */
 
     if (argc != 2) {
-        printf("ERROR: Pogresni argumenti\n");
-        printf("./vozila <ime_fajla>\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Pogresan poziv: %s <ime_fajla>\n", argv[0]);
+        exit(1);
     }
 
-    FILE* parking_fp = fopen_safe(argv[1], "r");
+    FILE* parking_fp = fopen_safe(argv[1], "r", 2);
 
     // Svu memoriju popunimo sa 0
     parking niz[MAX_ARR_SIZE] = { 0 };
@@ -78,7 +77,7 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-int total_parking_price_by_zone(const parking* niz, const int n, const char* zone, const int zone_price)
+int total_parking_price_by_zone(const parking* const niz, const int n, const char* const zone, const int zone_price)
 {
     int sum = 0;
     for (int i = 0; i < n; i++) {
@@ -90,7 +89,7 @@ int total_parking_price_by_zone(const parking* niz, const int n, const char* zon
     return sum;
 }
 
-void parking_print(const parking* parking)
+void parking_print(const parking* const parking)
 {
     printf("Grad %s\nZona %s\nRegistracija %s\nBroj Sati %u\n\n",
         parking->grad,
@@ -99,7 +98,7 @@ void parking_print(const parking* parking)
         parking->broj_provedenih_sati);
 }
 
-void ucitaj_parkinge(FILE* fp, parking* niz_parkinga, int* n)
+void ucitaj_parkinge(FILE* fp, parking* const niz_parkinga, int* n)
 {
 
     // Ovde idemo dok je *n < MAX_ARR_SIZE jer je to
@@ -118,14 +117,15 @@ void ucitaj_parkinge(FILE* fp, parking* niz_parkinga, int* n)
     }
 }
 
-FILE* fopen_safe(const char* filename, const char* mode)
+FILE* fopen_safe(const char* const filename, const char* const mode, const int error_code)
 {
     FILE* fp = fopen(filename, mode);
     if (fp == NULL) {
         // perror ispisuje poslat string i ispisuje gresku na koju je naisao.
         // Izprisi ili promeni ime fajlu koji hoces da citas i videces sta ce ispisati
         perror("Greska pri otvaranju fajla");
-        exit(EXIT_FAILURE);
+        exit(error_code);
     }
+
     return fp;
 }

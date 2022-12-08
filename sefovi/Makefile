@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Wextra
-LFLAGS=-lm
+LFLAGS=
 BIN=main
 OBJS=main.o
 ARGV=sefovi.txt 300.0 oporezovani.txt

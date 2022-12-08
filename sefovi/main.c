@@ -16,16 +16,16 @@ typedef struct {
     double tezina;
 } Sef;
 
-FILE* fopen_safe(const char* name, const char* mode);
-void sef_ucitaj(FILE* fp, Sef* niz, int* n, double max_tezina);
-void sef_print(FILE* fp, Sef* sef);
-int sef_broj_slobodnih(Sef* niz, int n);
+FILE* fopen_safe(const char* const name, const char* const mode, const int error_code);
+void sef_ucitaj(FILE* fp, Sef* const niz, int* const n, const double max_tezina);
+void sef_print(FILE* fp, const Sef* const sef);
+int sef_broj_slobodnih(const Sef* const niz, const int n);
 
 int main(int argc, char* argv[])
 {
     if (argc != 4) {
-        perror("Pogresna upotreba: ./sefovi <ulazni_fajl> <max_tezina> <izlazni_fajl>\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Pogresna upotreba: %s <ulazni_fajl> <max_tezina >= 0> <izlazni_fajl>\n", argv[0]);
+        exit(1);
     }
 
     /* Parsiranje argumeneta */
@@ -36,46 +36,37 @@ int main(int argc, char* argv[])
      * ali ovako je lepse :D */
 
     const char* input_file_name = argv[1];
+    const char* output_file_name = argv[3];
 
     /* Pogledaj `man strtod` */
-    double max_tezina = strtod(argv[2], NULL);
+    const double max_tezina = strtod(argv[2], NULL);
 
-    if (max_tezina == 0) {
-        perror("Pogresan argument za <max_tezinu>\n");
-        exit(EXIT_FAILURE);
+    if (max_tezina <= 0) {
+        fprintf(stderr, "Pogresan argument za <max_tezinu >= 0> \n");
+        exit(2);
     }
 
     /* Pogledaj `man errno` */
     if (errno == ERANGE) {
-        perror("Vrednost za <max_tezinu> je prevelika ili premala\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Vrednost za <max_tezinu> je prevelika ili premala\n");
+        exit(3);
     }
-
-    const char* output_file_name = argv[3];
 
     Sef niz[MAX_ARR_SIZE] = { 0 };
     int n = 0;
 
     /* Ucitavanje sefova */
-    FILE* input_file = fopen_safe(input_file_name, "r");
+    FILE* input_file = fopen_safe(input_file_name, "r", 4);
     sef_ucitaj(input_file, niz, &n, max_tezina);
     fclose(input_file);
 
     /* Ispis sefova na stdout */
     /* fprintf prima FILE* u koji ce da ispise text
-     * sko posaljemo stdout tj. Standard output stream
+     * ako posaljemo stdout tj. Standard output stream
      * On ce nam to ispisati u terminalu */
 
-    /* ifndef guards https://stackoverflow.com/questions/10077025/ifndef-syntax-for-include-guards-in-c */
-
-#ifndef NDEBUG
-    for (int i = 0; i < n; i++) {
-        sef_print(stdout, niz + i);
-    }
-#endif
-
     /* Ispis sefova u fajl */
-    FILE* output_file = fopen_safe(output_file_name, "w");
+    FILE* output_file = fopen_safe(output_file_name, "w", 5);
 
     fprintf(output_file, "Cene sefova nakon oporezivanja:\n\n");
     for (int i = 0; i < n; i++) {
@@ -87,12 +78,12 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void sef_print(FILE* fp, Sef* sef)
+void sef_print(FILE* fp, const Sef* const sef)
 {
     fprintf(fp, "%s %s %u %.1lf\n", sef->sifra, sef->zauzetost, sef->cena, sef->tezina);
 }
 
-int sef_broj_slobodnih(Sef* niz, int n)
+int sef_broj_slobodnih(const Sef* const niz, const int n)
 {
     int brojac = 0;
     for (int i = 0; i < n; i++) {
@@ -104,24 +95,23 @@ int sef_broj_slobodnih(Sef* niz, int n)
     return brojac;
 }
 
-void sef_ucitaj(FILE* fp, Sef* niz, int* n, double max_tezina)
+void sef_ucitaj(FILE* fp, Sef* const niz, int* const n, const double max_tezina)
 {
     while (*n < MAX_ARR_SIZE && fscanf(fp, "%s %s %u %lf", niz[*n].sifra, niz[*n].zauzetost, &niz[*n].cena, &niz[*n].tezina) != EOF) {
         if (strcmp(niz[*n].zauzetost, "zauzet") == 0 && niz[*n].tezina > max_tezina) {
             // Racunamo novu cenu kao 115% od stare
-            unsigned int stara_cena = niz[*n].cena;
             niz[*n].cena = round(1.15 * niz[*n].cena);
         }
         (*n)++;
     }
 }
 
-FILE* fopen_safe(const char* name, const char* mode)
+FILE* fopen_safe(const char* const name, const char* const mode, const int error_code)
 {
     FILE* fp = fopen(name, mode);
     if (fp == NULL) {
-        perror("Greska pri otvaranju fajla\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Greska pri otvaranju fajla \"%s\"\n", name);
+        exit(error_code);
     }
 
     return fp;

@@ -3,37 +3,41 @@
 #include <string.h>
 
 #define MAX_ARR_SIZE 20
+#define MAX_ID_SIZE 11
+#define MAX_POLAZAK_SIZE 4
+#define MAX_DOLAZAK_SIZE 4
 
 typedef struct {
-    char id[11];
-    char polazak[4];
-    char dolazak[4];
+    char id[MAX_ID_SIZE];
+    char polazak[MAX_POLAZAK_SIZE];
+    char dolazak[MAX_DOLAZAK_SIZE];
     unsigned int duzina;
     unsigned int broj_presedanja;
     double cena;
 } Let;
 
-FILE* otvori_datoteku(const char* name, const char* mode);
-int ucitaj_letove(Let* niz, FILE* fp, int n);
-int filtriraj_po_dolasku(Let* let, const char* dolazak);
+FILE* otvori_datoteku(const char* const name, const char* mode, const int error_code);
+int ucitaj_letove(FILE* fp, Let* const niz, int n);
+int filtriraj_po_dolasku(const Let* let, const char* dolazak);
 
 int main(int argc, char* argv[])
 {
-    Let niz[MAX_ARR_SIZE] = { 0 };
-    int n = 0;
     if (argc != 3) {
-        printf("Koriscenje: ./let <fajl_sa_letovime> <id_leta>");
-        exit(EXIT_FAILURE);
+        printf("Poziv: %s <fajl_sa_letovime> <id_leta>", argv[0]);
+        exit(1);
     }
 
-    FILE* input_file = otvori_datoteku(argv[1], "r");
-    n = ucitaj_letove(niz, input_file, n);
+    Let niz[MAX_ARR_SIZE] = { 0 };
+    int n = 0;
+
+    FILE* input_file = otvori_datoteku(argv[1], "r", 2);
+    n = ucitaj_letove(input_file, niz, n);
     fclose(input_file);
 
     char outfile_name[18];
     sprintf(outfile_name, "letovi_ka_%s.txt", argv[2]);
 
-    FILE* outfile = otvori_datoteku(outfile_name, "w");
+    FILE* outfile = otvori_datoteku(outfile_name, "w", 3);
 
     int pronadjenih_letova = 0;
 
@@ -53,12 +57,12 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-int filtriraj_po_dolasku(Let* let, const char* dolazak)
+int filtriraj_po_dolasku(const Let* let, const char* dolazak)
 {
-    return strncmp(let->dolazak, dolazak, 4);
+    return strncmp(let->dolazak, dolazak, MAX_DOLAZAK_SIZE);
 }
 
-int ucitaj_letove(Let* niz, FILE* fp, int n)
+int ucitaj_letove(FILE* fp, Let* const niz, int n)
 {
     while (
         n < MAX_ARR_SIZE
@@ -91,13 +95,13 @@ int ucitaj_letove(Let* niz, FILE* fp, int n)
     return n;
 }
 
-FILE* otvori_datoteku(const char* name, const char* mode)
+FILE* otvori_datoteku(const char* const name, const char* const mode, const int error_code)
 {
 
     FILE* fp = fopen(name, mode);
     if (fp == NULL) {
-        perror("Greska pri otvaranju falja\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "Greska pri otvaranju falja %s\n", name);
+        exit(error_code);
     }
 
     return fp;
