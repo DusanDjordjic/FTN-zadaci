@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     int n = 0;
 
     FILE* fp = otvori_datoteku(argv[1], "r", 2);
+
     n = ucitaj_automobile(fp, niz, n);
     fclose(fp);
 
