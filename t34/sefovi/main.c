@@ -8,10 +8,12 @@
  * Sve u svemu to je standardizovani makro koji govori da li smo u debug modu ili ne */
 #define NDEBUG
 #define MAX_ARR_SIZE 20
+#define MAX_SIFRA 6
+#define MAX_ZAU 9
 
 typedef struct {
-    char sifra[6];
-    char zauzetost[9];
+    char sifra[MAX_SIFRA];
+    char zauzetost[MAX_ZAU];
     unsigned int cena;
     double tezina;
 } Sef;
@@ -41,6 +43,11 @@ int main(int argc, char* argv[])
     /* Pogledaj `man strtod` */
     const double max_tezina = strtod(argv[2], NULL);
 
+    if (max_tezina < 5) {
+        printf("Greska");
+        exit(2);
+    }
+
     if (max_tezina <= 0) {
         fprintf(stderr, "Pogresan argument za <max_tezinu >= 0> \n");
         exit(2);
@@ -52,7 +59,7 @@ int main(int argc, char* argv[])
         exit(3);
     }
 
-    Sef niz[MAX_ARR_SIZE] = { 0 };
+    Sef niz[MAX_ARR_SIZE];
     int n = 0;
 
     /* Ucitavanje sefova */
@@ -72,6 +79,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < n; i++) {
         sef_print(output_file, niz + i);
     }
+
     fprintf(output_file, "\nBroj slobodnih sefova: %d", sef_broj_slobodnih(niz, n));
 
     fclose(output_file);

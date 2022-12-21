@@ -35,7 +35,11 @@ int main(int argc, char* argv[])
     fclose(input_file);
 
     char outfile_name[18];
-    sprintf(outfile_name, "letovi_ka_%s.txt", argv[2]);
+
+    // sprintf(outfile_name, "letovi_ka_%s.txt", argv[2]);
+    strcat(outfile_name, "letovi_ka_");
+    strncat(outfile_name, argv[2], 3);
+    strcat(outfile_name, ".txt");
 
     FILE* outfile = otvori_datoteku(outfile_name, "w", 3);
 
